@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tic Tac Toe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(to bottom right, #f0f8ff, #e6e6fa);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            gap: 5px;
+            margin: 20px auto;
+            transition: transform 0.3s;
+        }
+        .cell {
+            width: 100px;
+            height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            background: url('https://www.transparenttextures.com/patterns/whitestripes.png');
+            border: 2px solid #333;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.3s;
+        }
+        .cell:hover {
+            background: url('https://www.transparenttextures.com/patterns/lightpaper.png');
+            transform: scale(1.05);
+        }
+        .message {
+            margin-top: 20px;
+            font-size: 24px;
+            color: #333;
+            transition: opacity 0.3s;
+        }
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 18px;
+            background-color: #4CAF50; /* Green */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049; /* Darker green */
+        }
+        .winning-line {
+            position: absolute;
+            height: 10px;
+            background-color: red;
+            transition: width 0.3s, transform 0.3s;
+            z-index: 1;
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>Tic Tac Toe</h1>
+<div class="board" id="board"></div>
+<div class="message" id="message"></div>
+<button id="restart">Restart</button>
+<div class="winning-line" id="winningLine"></div>
+
+<script>
+    const boardElement = document.getElementById('board');
+    const messageElement = document.getElementById('message');
+    const restartButton = document.getElementById('restart');
+    const winningLine = document.getElementById('winningLine');
+    let board = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
+    let gameActive = true;
+
+    const winningConditions = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6]
+    ];
+
+    function createBoard() {
+        boardElement.innerHTML = '';
+        board.forEach((cell, index) => {
+            const cellElement = document.createElement('div');
+            cellElement.classList.add('cell');
+            cellElement.textContent = cell;
+            cellElement.addEventListener('click', () => handleCellClick(index));
+            boardElement.appendChild(cellElement);
+        });
+    }
+
+    function handleCellClick(index) {
+        if (board[index] !== '' || !gameActive) return;
+
+        board[index] = currentPlayer;
+        checkResult();
+        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+        createBoard();
+    }
+
+    function checkResult() {
+        let roundWon = false;
+        let winningIndex = [];
+        for (const condition of winningConditions) {
+            const [a, b, c] = condition;
+            if (board[a] === '' || board[b] === '' || board[c] === '') continue;
+            if (board[a] === board[b] && board[b] === board[c]) {
+                roundWon = true;
+                winningIndex = [a, b, c];
+                break;
+            }
+        }
+
+        if (roundWon) {
+            drawWinningLine(winningIndex);
+            messageElement.textContent = `Player ${currentPlayer} wins!`;
+            messageElement.classList.add('fade-in');
+            gameActive = false;
+            return;
+        }
+
+        if (!board.includes('')) {
+            messageElement.textContent = 'It\'s a draw!';
+            messageElement.classList.add('fade-in');
+            gameActive = false;
+            return;
+        }
+    }
+
+    function drawWinningLine(winningIndex) {
+        const [a, b, c] = winningIndex;
+        const cellA = document.querySelectorAll('.cell')[a];
+        const cellB = document.querySelectorAll('.cell')[b];
+        const cellC = document.querySelectorAll('.cell')[c];
+
+        // Calculate winning line position
+        const rectA = cellA.getBoundingClientRect();
+        const rectB = cellB.getBoundingClientRect();
+        const rectC = cellC.getBoundingClientRect();
+
+        let lineX = rectA.left + rectA.width / 2;
+        let lineY = rectA.top + rectA.height / 2;
+
+        if (a === b && b === c) {
+            // Vertical line
+            winningLine.style.width = '100%';
+            winningLine.style.transform = `translateX(${lineX - 50}px) translateY(${lineY - 5}px) rotate(90deg)`;
+        } else if (a === b || b === c) {
+            // Horizontal line
+            lineY = rectA.top + rectA.height / 2;
+            winningLine.style.width = `${Math.abs(rectB.left - rectA.left) + rectA.width}px`;
+            winningLine.style.transform = `translateX(${lineX - (rectB.left < rectA.left ? rectA.width : 0)}px) translateY(${lineY - 5}px)`;
+        } else {
+            // Diagonal line
+            winningLine.style.width = '140%';
+            winningLine.style.transform = `translateX(${lineX - 70}px) translateY(${lineY - 5}px) rotate(45deg)`;
+        }
+
+        winningLine.style.opacity = '1';
+    }
+
+    restartButton.addEventListener('click', () => {
+        board = ['', '', '', '', '', '', '', '', ''];
+        currentPlayer = 'X';
+        gameActive = true;
+        messageElement.textContent = '';
+        winningLine.style.opacity = '0'; // Hide the winning line
+        createBoard();
+    });
+
+    createBoard();
+</script>
+
+</body>
+</html>

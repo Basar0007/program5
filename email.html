@@ -1,0 +1,69 @@
+<html>
+<head>
+
+<script>
+
+function ValidateEmail(input) {
+
+  var validRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
+
+  if (input.value.match(validRegex)) {
+
+    alert("Valid email address!");
+
+    document.form.text1.focus();
+
+    return true;
+
+  } else {
+
+    alert("Invalid email address!");
+
+    document.form.text1.focus();
+
+    return false;
+
+  }
+
+}
+
+</script>
+</head>
+
+  <body onload="document.form.text1.focus()">
+
+    <div class="mail">
+
+      <h2>Email Validation Form</h2>
+
+      <form name="form" action="#">
+
+   
+          Enter Email Id:<input type="text" name="text1" />
+
+        
+          <class="validate">
+
+            <input
+
+              type="submit"
+
+              name="validate"
+
+              value="Validate"
+
+              onclick="ValidateEmail(document.form.text1)"/>
+
+
+      </form>
+
+    </div>
+	
+
+  </body>
+
+</html>
+
+
+
+
